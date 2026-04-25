@@ -1,0 +1,5 @@
+../Core/Src/freertos.c:104:6:MX_FREERTOS_Init	16	static
+../Core/Src/freertos.c:179:6:StartDefaultTask	16	static
+../Core/Src/freertos.c:204:6:StartDispatcherTask	280	static
+../Core/Src/freertos.c:246:6:udp_listener_init	16	static
+../Core/Src/freertos.c:281:6:udp_receive_callback	304	static

@@ -1,0 +1,6 @@
+../UUT_code/Src/spi_task.c:80:13:send_result_callback	32	static
+../UUT_code/Src/spi_task.c:108:16:validate_spi_loopback	32	static
+../UUT_code/Src/spi_task.c:141:6:StartSPITask	320	static
+../UUT_code/Src/spi_task.c:268:6:HAL_SPI_TxRxCpltCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/spi_task.c:291:6:HAL_SPI_RxCpltCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/spi_task.c:313:6:HAL_SPI_ErrorCallback	32	static,ignoring_inline_asm

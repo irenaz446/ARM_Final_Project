@@ -1,0 +1,9 @@
+CLI Usage:
+
+Single: ./pc_test_program uart 10
+
+All: ./pc_test_program --all 5
+
+Report: ./pc_test_program --report
+
+./pc_test_uut --clean

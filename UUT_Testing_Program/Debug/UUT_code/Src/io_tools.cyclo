@@ -1,0 +1,3 @@
+../UUT_code/Src/io_tools.c:8:5:__io_putchar	1
+../UUT_code/Src/io_tools.c:14:5:_write	1
+../UUT_code/Src/io_tools.c:22:5:_read	3

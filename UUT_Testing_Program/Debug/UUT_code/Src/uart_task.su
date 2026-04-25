@@ -1,0 +1,5 @@
+../UUT_code/Src/uart_task.c:65:13:send_result_callback	32	static
+../UUT_code/Src/uart_task.c:93:16:validate_loopback	32	static
+../UUT_code/Src/uart_task.c:125:6:StartUARTTask	304	static
+../UUT_code/Src/uart_task.c:226:6:HAL_UART_RxCpltCallback	24	static,ignoring_inline_asm
+../UUT_code/Src/uart_task.c:243:6:HAL_UART_ErrorCallback	16	static

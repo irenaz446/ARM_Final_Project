@@ -1,0 +1,10 @@
+../UUT_code/Src/i2c_task.c:107:13:send_result_callback	32	static
+../UUT_code/Src/i2c_task.c:135:16:validate_loopback	32	static
+../UUT_code/Src/i2c_task.c:165:16:run_phase1_write	32	static,ignoring_inline_asm
+../UUT_code/Src/i2c_task.c:217:16:run_phase2_read	32	static,ignoring_inline_asm
+../UUT_code/Src/i2c_task.c:269:6:StartI2CTask	304	static
+../UUT_code/Src/i2c_task.c:347:6:HAL_I2C_MasterTxCpltCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/i2c_task.c:366:6:HAL_I2C_SlaveRxCpltCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/i2c_task.c:385:6:HAL_I2C_MasterRxCpltCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/i2c_task.c:404:6:HAL_I2C_SlaveTxCpltCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/i2c_task.c:424:6:HAL_I2C_ErrorCallback	32	static,ignoring_inline_asm
