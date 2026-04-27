@@ -83,7 +83,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Middlewares/Third_Party/LwIP/system/arch/sys_arch.h \
  ../LWIP/Target/ethernetif.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/tcpip.h \
- ../Core/Inc/spi.h ../Core/Inc/usart.h ../Core/Inc/gpio.h
+ ../Core/Inc/spi.h ../Core/Inc/tim.h ../Core/Inc/usart.h \
+ ../Core/Inc/gpio.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h:
 ../Core/Inc/stm32f7xx_hal_conf.h:
@@ -174,5 +175,6 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../LWIP/Target/ethernetif.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/tcpip.h:
 ../Core/Inc/spi.h:
+../Core/Inc/tim.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/gpio.h:

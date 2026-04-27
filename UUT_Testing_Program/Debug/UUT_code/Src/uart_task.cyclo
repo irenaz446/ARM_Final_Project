@@ -1,5 +1,4 @@
-../UUT_code/Src/uart_task.c:65:13:send_result_callback	3
-../UUT_code/Src/uart_task.c:93:16:validate_loopback	4
-../UUT_code/Src/uart_task.c:125:6:StartUARTTask	7
-../UUT_code/Src/uart_task.c:226:6:HAL_UART_RxCpltCallback	2
-../UUT_code/Src/uart_task.c:243:6:HAL_UART_ErrorCallback	3
+../UUT_code/Src/uart_task.c:63:16:validate_loopback	3
+../UUT_code/Src/uart_task.c:90:6:StartUARTTask	6
+../UUT_code/Src/uart_task.c:164:6:HAL_UART_RxCpltCallback	2
+../UUT_code/Src/uart_task.c:179:6:HAL_UART_ErrorCallback	3

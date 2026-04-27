@@ -1,0 +1,3 @@
+../UUT_code/Src/timer_task.c:113:16:run_timer_iteration	32	static
+../UUT_code/Src/timer_task.c:168:16:validate_timer	40	static
+../UUT_code/Src/timer_task.c:196:6:StartTimerTask	296	static

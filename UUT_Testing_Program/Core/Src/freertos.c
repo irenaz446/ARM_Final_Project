@@ -55,18 +55,21 @@ TaskHandle_t      UARTTaskHandle;
 TaskHandle_t      SPITaskHandle;
 TaskHandle_t      I2CTaskHandle;
 TaskHandle_t      ADCTaskHandle;
+TaskHandle_t      TimerTaskHandle;
 TaskHandle_t      DispatcherTaskHandle;
 QueueHandle_t     periphQueueHandle;
 SemaphoreHandle_t uartSemHandle;
 SemaphoreHandle_t spiSemHandle; 
 SemaphoreHandle_t i2cSemHandle;
 SemaphoreHandle_t adcSemHandle;
+SemaphoreHandle_t timerSemHandle;
 
 /* Shared: Dispatcher writes, peripheral task reads */
 test_command_t    g_uart_cmd;   
 test_command_t    g_spi_cmd;
 test_command_t 	  g_i2c_cmd;
 test_command_t    g_adc_cmd;
+test_command_t    g_timer_cmd;
 
 uint16_t g_pc_port;
 /* USER CODE END Variables */
@@ -86,6 +89,7 @@ void StartUARTTask(void *argument);
 void StartSPITask(void *argument);
 void StartI2CTask(void *argument);
 void StartADCTask(void *argument);
+void StartTimerTask(void *argument);
 void udp_listener_init(void);
 void udp_receive_callback(void *arg, struct udp_pcb *upcb, struct pbuf *p,
                           const ip_addr_t *addr, u16_t port);
@@ -116,6 +120,7 @@ void MX_FREERTOS_Init(void) {
 	spiSemHandle  = xSemaphoreCreateBinary();
 	i2cSemHandle  = xSemaphoreCreateBinary();
 	adcSemHandle = xSemaphoreCreateBinary();
+	timerSemHandle = xSemaphoreCreateBinary();
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* USER CODE BEGIN RTOS_TIMERS */
@@ -161,6 +166,11 @@ void MX_FREERTOS_Init(void) {
 				configMINIMAL_STACK_SIZE * 4,
 	            NULL, osPriorityNormal1,
 				&ADCTaskHandle);
+	xTaskCreate(StartTimerTask,
+				"TimerTask",
+				configMINIMAL_STACK_SIZE * 4,
+	            NULL, osPriorityNormal2,
+				&TimerTaskHandle);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -207,6 +217,11 @@ void StartDispatcherTask(void *argument) {
     for (;;) {
         if (xQueueReceive(periphQueueHandle, &cmd, portMAX_DELAY) == pdPASS) {
             switch (cmd.peripheral_id) {
+				case TIMER_TEST:
+					g_timer_cmd = cmd;
+					xSemaphoreGive(timerSemHandle);
+					break;
+
                 case UART_TEST: /* UART */
                     g_uart_cmd = cmd;
                     xSemaphoreGive(uartSemHandle);

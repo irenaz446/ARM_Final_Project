@@ -1,0 +1,3 @@
+../UUT_code/Src/uut_task.c:36:13:send_result_callback	3
+../UUT_code/Src/uut_task.c:68:6:uut_send_result	2
+../UUT_code/Src/uut_task.c:96:9:uut_validate_crc	2

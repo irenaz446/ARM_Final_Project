@@ -14,15 +14,13 @@
  *            UART5 TX --> UART4 RX
  *
  * @note   All lwIP API calls are delegated to the lwIP core task via
- *         tcpip_callback() to avoid thread-safety violations.
+ *         uut_send_result() — see uut_task.c.
  */
 
-#include "pc_test_uut.h"
 #include "uut_task.h"
 #include "main.h"
 #include "cmsis_os.h"
 #include "FreeRTOS.h"
-#include "queue.h"
 #include "semphr.h"
 #include <string.h>
 
@@ -31,61 +29,33 @@
  * -------------------------------------------------------------------------*/
 extern UART_HandleTypeDef huart4;
 extern UART_HandleTypeDef huart5;
-extern CRC_HandleTypeDef  hcrc;
 
 /* ---------------------------------------------------------------------------
  * Shared inter-task variables (defined in freertos.c, owned by Dispatcher)
  * -------------------------------------------------------------------------*/
-extern SemaphoreHandle_t uartSemHandle;  /* Binary semaphore: Dispatcher -> UARTTask  */
-extern TaskHandle_t      UARTTaskHandle; /* Used by ISR to notify this task directly  */
-extern test_command_t    g_uart_cmd;     /* Command written by Dispatcher before Give  */
-extern uint16_t          g_pc_port;     /* Source port of last UDP packet from PC     */
+extern SemaphoreHandle_t uartSemHandle;
+extern TaskHandle_t      UARTTaskHandle;
+extern test_command_t    g_uart_cmd;
+extern uint16_t          g_pc_port;
 
 /* ---------------------------------------------------------------------------
  * Private DMA buffers
+ * aligned(4): required by STM32 DMA controller (word-aligned transfers)
+ * static:     file-local scope — not exposed to other modules
  * -------------------------------------------------------------------------*/
-static uint8_t u4_rx_buf[MAX_PATTERN_LEN] __attribute__((aligned(4))); /* UART4 RX (From UART5 TX to UART4 RX) */
-static uint8_t u5_rx_buf[MAX_PATTERN_LEN] __attribute__((aligned(4))); /* UART5 RX (From UART4 TX to UART5 RX) */
+static uint8_t u4_rx_buf[MAX_PATTERN_LEN] __attribute__((aligned(4))); /* UART4 RX */
+static uint8_t u5_rx_buf[MAX_PATTERN_LEN] __attribute__((aligned(4))); /* UART5 RX */
 
 /* ---------------------------------------------------------------------------
  * Private function prototypes
  * -------------------------------------------------------------------------*/
-static void    send_result_callback(void *arg);
 static uint8_t validate_loopback(const test_command_t *cmd);
-
-/* ---------------------------------------------------------------------------
- * @brief  lwIP core callback — sends UDP result packet to PC.
- *
- * Executed inside the lwIP core task context (safe to call all lwIP APIs).
- * Frees the udp_send_req_t allocated by StartUARTTask before returning.
- *
- * @param  arg  Pointer to a heap-allocated udp_send_req_t.
- * @retval None
- * -------------------------------------------------------------------------*/
-static void send_result_callback(void *arg)
-{
-    udp_send_req_t *req = (udp_send_req_t *)arg;
-    struct udp_pcb *pcb = udp_new();
-
-    if (pcb != NULL) {
-        struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, sizeof(req->res), PBUF_RAM);
-        if (p != NULL) {
-            memcpy(p->payload, &req->res, sizeof(req->res));
-            udp_sendto(pcb, p, &req->addr, req->port);
-            pbuf_free(p);
-        }
-        udp_remove(pcb);
-    }
-
-    vPortFree(req);
-}
 
 /* ---------------------------------------------------------------------------
  * @brief  Validates the loopback buffer against what UART5 received.
  *
- * Uses hardware CRC32 for patterns longer than 100 bytes to reduce CPU load.
- * Uses memcmp for shorter patterns. Both u5_rx_buf (reference) and u4_rx_buf
- * (result) are 4-byte aligned, satisfying the STM32 CRC peripheral requirement.
+ * Uses uut_validate_crc (hardware CRC32) for patterns longer than 100 bytes.
+ * Uses memcmp for shorter patterns. Both buffers are 4-byte aligned.
  *
  * @param  cmd  Pointer to the test command containing pattern length.
  * @retval TEST_SUCCESS if data matches, TEST_FAILURE otherwise.
@@ -93,19 +63,14 @@ static void send_result_callback(void *arg)
 static uint8_t validate_loopback(const test_command_t *cmd)
 {
     if (cmd->pattern_len > 100) {
-        uint32_t words  = cmd->pattern_len / 4;
-        uint32_t c_sent = HAL_CRC_Calculate(&hcrc, (uint32_t *)u5_rx_buf, words);
-        uint32_t c_recv = HAL_CRC_Calculate(&hcrc, (uint32_t *)u4_rx_buf, words);
+        return uut_validate_crc((uint32_t *)u5_rx_buf,
+                                (uint32_t *)u4_rx_buf,
+                                cmd->pattern_len);
+    }
 
-        if (c_sent != c_recv) {
-            printf("ERROR: CRC mismatch: sent=%lu recv=%lu\r\n", c_sent, c_recv);
-            return TEST_FAILURE;
-        }
-    } else {
-        if (memcmp(u5_rx_buf, u4_rx_buf, cmd->pattern_len) != 0) {
-            printf("ERROR: Data mismatch on loopback\r\n");
-            return TEST_FAILURE;
-        }
+    if (memcmp(u5_rx_buf, u4_rx_buf, cmd->pattern_len) != 0) {
+        printf("ERROR: UART data mismatch on loopback\r\n");
+        return TEST_FAILURE;
     }
 
     return TEST_SUCCESS;
@@ -117,16 +82,15 @@ static uint8_t validate_loopback(const test_command_t *cmd)
  * Blocks on uartSemHandle until the Dispatcher wakes it with a command.
  * Runs cmd.iterations loopback cycles and sends a pass/fail result to the PC.
  *
- * Priority: osPriorityNormal2 (highest among application tasks)
+ * Priority: osPriorityNormal2 (highest among application tasks).
  *
  * @param  argument  Unused (required by FreeRTOS task signature).
  * @retval None (infinite loop — never returns)
  * -------------------------------------------------------------------------*/
 void StartUARTTask(void const *argument)
 {
-    test_result_t  res;
-    ip_addr_t      pc_addr;
-    uint8_t        test_success;
+    ip_addr_t pc_addr;
+    uint8_t   test_success;
 
     ipaddr_aton(PC_IP, &pc_addr);
 
@@ -134,6 +98,7 @@ void StartUARTTask(void const *argument)
         /* Wait for Dispatcher to signal a new command */
         xSemaphoreTake(uartSemHandle, portMAX_DELAY);
 
+        /* Take a local copy — Dispatcher may overwrite g_uart_cmd immediately */
         test_command_t cmd = g_uart_cmd;
         test_success = TEST_SUCCESS;
 
@@ -143,11 +108,9 @@ void StartUARTTask(void const *argument)
         for (int i = 0; i < cmd.iterations; i++) {
 
             /* ----------------------------------------------------------
-             * Part 1: UART4 TX --> UART5 RX
-             *
-             * Prepare UART5 receiver first, then start UART4 transmitter.
-             * ulTaskNotifyTake blocks until HAL_UART_RxCpltCallback
-             * fires for UART5 (500 ms timeout).
+             * Leg 1: UART4 TX --> UART5 RX
+             * Arm UART5 receiver first, then fire UART4 transmitter.
+             * ulTaskNotifyTake blocks until RxCpltCallback fires (500ms).
              * --------------------------------------------------------*/
             HAL_UART_Receive_DMA(&huart5, u5_rx_buf, cmd.pattern_len);
             HAL_UART_Transmit_DMA(&huart4, cmd.pattern, cmd.pattern_len);
@@ -161,11 +124,9 @@ void StartUARTTask(void const *argument)
             printf("DEBUG: Iteration %d — UART5 received. Bouncing back...\r\n", i);
 
             /* ----------------------------------------------------------
-             * Part 2: UART5 TX --> UART4 RX 
-             *
-             * u5_rx_buf holds the data received in Part 1 — transmit it
-             * back via UART5. ulTaskNotifyTake blocks until
-             * HAL_UART_RxCpltCallback fires for UART4 (500 ms timeout).
+             * Leg 2: UART5 TX --> UART4 RX
+             * u5_rx_buf holds the data from Leg 1 — transmit it back.
+             * ulTaskNotifyTake blocks until RxCpltCallback fires (500ms).
              * --------------------------------------------------------*/
             HAL_UART_Receive_DMA(&huart4, u4_rx_buf, cmd.pattern_len);
             HAL_UART_Transmit_DMA(&huart5, u5_rx_buf, cmd.pattern_len);
@@ -176,10 +137,6 @@ void StartUARTTask(void const *argument)
                 break;
             }
 
-            /* ----------------------------------------------------------
-             * Validation: compare u5_rx_buf (sent) vs u4_rx_buf (received).
-             * Both buffers are aligned — safe for CRC peripheral access.
-             * --------------------------------------------------------*/
             if (validate_loopback(&cmd) != TEST_SUCCESS) {
                 test_success = TEST_FAILURE;
                 break;
@@ -191,51 +148,30 @@ void StartUARTTask(void const *argument)
         printf("UART: Test finished. Result: %s\r\n",
                (test_success == TEST_SUCCESS) ? "PASS" : "FAIL");
 
-        /* ------------------------------------------------------------------
-         * Send result to PC.
-         * udp_sendto must not be called from this task — lwIP is not
-         * thread-safe. Schedule the send in the lwIP core task via
-         * tcpip_callback() with a heap-allocated request struct.
-         * ----------------------------------------------------------------*/
-        res.test_id = cmd.test_id;
-        res.result  = test_success;
-
-        udp_send_req_t *req = pvPortMalloc(sizeof(udp_send_req_t));
-        if (req != NULL) {
-            req->res  = res;
-            req->addr = pc_addr;
-            req->port = g_pc_port; 
-            tcpip_callback(send_result_callback, req);
-        } else {
-            printf("ERROR: Failed to allocate UDP send request\r\n");
-        }
+        uut_send_result(cmd.test_id, test_success, &pc_addr, g_pc_port);
     }
 }
 
 /* ---------------------------------------------------------------------------
  * @brief  HAL UART RX complete callback — called from DMA ISR context.
  *
- * Notifies StartUARTTask using a direct task notification and triggers
- * immediate context switch if the notified task has higher priority than
- * the currently running task.
+ * Both UART4 and UART5 notify the same task sequentially via
+ * ulTaskNotifyTake, so no instance check is needed here.
  *
- * @param  huart  UART handle that completed reception (unused — both UARTs
- *                notify the same task sequentially).
+ * @param  huart  Unused — both UARTs notify the same task.
  * @retval None
  * -------------------------------------------------------------------------*/
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-    BaseType_t x_higher_priority_task_woken = pdFALSE;
+    BaseType_t x = pdFALSE;
 
     (void)huart;
-    vTaskNotifyGiveFromISR(UARTTaskHandle, &x_higher_priority_task_woken);
-    portYIELD_FROM_ISR(x_higher_priority_task_woken);
+    vTaskNotifyGiveFromISR(UARTTaskHandle, &x);
+    portYIELD_FROM_ISR(x);
 }
 
 /* ---------------------------------------------------------------------------
  * @brief  HAL UART error callback — called from DMA/UART ISR context.
- *
- * Logs the peripheral error code to the debug console for diagnostics.
  *
  * @param  huart  UART handle that encountered an error.
  * @retval None

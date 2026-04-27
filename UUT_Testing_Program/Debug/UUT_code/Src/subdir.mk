@@ -9,21 +9,27 @@ C_SRCS += \
 ../UUT_code/Src/i2c_task.c \
 ../UUT_code/Src/io_tools.c \
 ../UUT_code/Src/spi_task.c \
-../UUT_code/Src/uart_task.c 
+../UUT_code/Src/timer_task.c \
+../UUT_code/Src/uart_task.c \
+../UUT_code/Src/uut_task.c 
 
 OBJS += \
 ./UUT_code/Src/adc_task.o \
 ./UUT_code/Src/i2c_task.o \
 ./UUT_code/Src/io_tools.o \
 ./UUT_code/Src/spi_task.o \
-./UUT_code/Src/uart_task.o 
+./UUT_code/Src/timer_task.o \
+./UUT_code/Src/uart_task.o \
+./UUT_code/Src/uut_task.o 
 
 C_DEPS += \
 ./UUT_code/Src/adc_task.d \
 ./UUT_code/Src/i2c_task.d \
 ./UUT_code/Src/io_tools.d \
 ./UUT_code/Src/spi_task.d \
-./UUT_code/Src/uart_task.d 
+./UUT_code/Src/timer_task.d \
+./UUT_code/Src/uart_task.d \
+./UUT_code/Src/uut_task.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -33,7 +39,7 @@ UUT_code/Src/%.o UUT_code/Src/%.su UUT_code/Src/%.cyclo: ../UUT_code/Src/%.c UUT
 clean: clean-UUT_code-2f-Src
 
 clean-UUT_code-2f-Src:
-	-$(RM) ./UUT_code/Src/adc_task.cyclo ./UUT_code/Src/adc_task.d ./UUT_code/Src/adc_task.o ./UUT_code/Src/adc_task.su ./UUT_code/Src/i2c_task.cyclo ./UUT_code/Src/i2c_task.d ./UUT_code/Src/i2c_task.o ./UUT_code/Src/i2c_task.su ./UUT_code/Src/io_tools.cyclo ./UUT_code/Src/io_tools.d ./UUT_code/Src/io_tools.o ./UUT_code/Src/io_tools.su ./UUT_code/Src/spi_task.cyclo ./UUT_code/Src/spi_task.d ./UUT_code/Src/spi_task.o ./UUT_code/Src/spi_task.su ./UUT_code/Src/uart_task.cyclo ./UUT_code/Src/uart_task.d ./UUT_code/Src/uart_task.o ./UUT_code/Src/uart_task.su
+	-$(RM) ./UUT_code/Src/adc_task.cyclo ./UUT_code/Src/adc_task.d ./UUT_code/Src/adc_task.o ./UUT_code/Src/adc_task.su ./UUT_code/Src/i2c_task.cyclo ./UUT_code/Src/i2c_task.d ./UUT_code/Src/i2c_task.o ./UUT_code/Src/i2c_task.su ./UUT_code/Src/io_tools.cyclo ./UUT_code/Src/io_tools.d ./UUT_code/Src/io_tools.o ./UUT_code/Src/io_tools.su ./UUT_code/Src/spi_task.cyclo ./UUT_code/Src/spi_task.d ./UUT_code/Src/spi_task.o ./UUT_code/Src/spi_task.su ./UUT_code/Src/timer_task.cyclo ./UUT_code/Src/timer_task.d ./UUT_code/Src/timer_task.o ./UUT_code/Src/timer_task.su ./UUT_code/Src/uart_task.cyclo ./UUT_code/Src/uart_task.d ./UUT_code/Src/uart_task.o ./UUT_code/Src/uart_task.su ./UUT_code/Src/uut_task.cyclo ./UUT_code/Src/uut_task.d ./UUT_code/Src/uut_task.o ./UUT_code/Src/uut_task.su
 
 .PHONY: clean-UUT_code-2f-Src
 

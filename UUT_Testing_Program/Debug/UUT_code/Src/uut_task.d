@@ -1,4 +1,4 @@
-UUT_code/Src/i2c_task.o: ../UUT_code/Src/i2c_task.c \
+UUT_code/Src/uut_task.o: ../UUT_code/Src/uut_task.c \
  C:/Users/iraze/STM32CubeIDE/workspace_1.19.0/UUT_Testing_Program/UUT_code/Inc/uut_task.h \
  C:/Users/iraze/STM32CubeIDE/workspace_1.19.0/UUT_Testing_Program/UUT_code/Inc/pc_test_uut.h \
  ../Middlewares/Third_Party/LwIP/src/include/lwip/udp.h \
@@ -79,10 +79,7 @@ UUT_code/Src/i2c_task.o: ../UUT_code/Src/i2c_task.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
- ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 C:/Users/iraze/STM32CubeIDE/workspace_1.19.0/UUT_Testing_Program/UUT_code/Inc/uut_task.h:
 C:/Users/iraze/STM32CubeIDE/workspace_1.19.0/UUT_Testing_Program/UUT_code/Inc/pc_test_uut.h:
 ../Middlewares/Third_Party/LwIP/src/include/lwip/udp.h:
@@ -165,6 +162,3 @@ C:/Users/iraze/STM32CubeIDE/workspace_1.19.0/UUT_Testing_Program/UUT_code/Inc/pc
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h:
-../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:

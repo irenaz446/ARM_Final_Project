@@ -1,8 +1,7 @@
-../UUT_code/Src/adc_task.c:126:13:send_result_callback	32	static
-../UUT_code/Src/adc_task.c:158:16:adc_sample_average	32	static
-../UUT_code/Src/adc_task.c:208:16:adc_calibrate	24	static
-../UUT_code/Src/adc_task.c:246:16:adc_run_iteration	16	static
-../UUT_code/Src/adc_task.c:261:16:adc_validate	40	static
-../UUT_code/Src/adc_task.c:293:6:StartADCTask	312	static
-../UUT_code/Src/adc_task.c:407:6:HAL_ADC_ConvCpltCallback	32	static,ignoring_inline_asm
-../UUT_code/Src/adc_task.c:426:6:HAL_ADC_ErrorCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/adc_task.c:130:16:adc_sample_average	32	static
+../UUT_code/Src/adc_task.c:180:16:adc_calibrate	24	static
+../UUT_code/Src/adc_task.c:218:16:adc_run_iteration	16	static
+../UUT_code/Src/adc_task.c:233:16:adc_validate	40	static
+../UUT_code/Src/adc_task.c:265:6:StartADCTask	296	static
+../UUT_code/Src/adc_task.c:364:6:HAL_ADC_ConvCpltCallback	32	static,ignoring_inline_asm
+../UUT_code/Src/adc_task.c:383:6:HAL_ADC_ErrorCallback	32	static,ignoring_inline_asm

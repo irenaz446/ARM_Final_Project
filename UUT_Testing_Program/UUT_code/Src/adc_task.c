@@ -108,38 +108,10 @@ static uint32_t g_adc_baseline = 0;
 /* ---------------------------------------------------------------------------
  * Private function prototypes
  * -------------------------------------------------------------------------*/
-static void     send_result_callback(void *arg);
 static uint8_t  adc_sample_average(uint16_t num_samples, uint32_t *result_out);
 static uint8_t  adc_calibrate(void);
 static uint8_t  adc_run_iteration(uint32_t *result_out);
 static uint8_t  adc_validate(uint32_t measured);
-
-/* ---------------------------------------------------------------------------
- * @brief  lwIP core callback — sends UDP result packet to PC.
- *
- * Executed inside the lwIP core task context (safe to call all lwIP APIs).
- * Frees the udp_send_req_t allocated by StartADCTask before returning.
- *
- * @param  arg  Pointer to a heap-allocated udp_send_req_t.
- * @retval None
- * -------------------------------------------------------------------------*/
-static void send_result_callback(void *arg)
-{
-    udp_send_req_t *req = (udp_send_req_t *)arg;
-    struct udp_pcb *pcb = udp_new();
-
-    if (pcb != NULL) {
-        struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, sizeof(req->res), PBUF_RAM);
-        if (p != NULL) {
-            memcpy(p->payload, &req->res, sizeof(req->res));
-            udp_sendto(pcb, p, &req->addr, req->port);
-            pbuf_free(p);
-        }
-        udp_remove(pcb);
-    }
-
-    vPortFree(req); /* Always free — even if send failed */
-}
 
 /* ---------------------------------------------------------------------------
  * @brief  Performs num_samples ADC conversions via DMA and returns average.
@@ -292,7 +264,6 @@ static uint8_t adc_validate(uint32_t measured)
  * -------------------------------------------------------------------------*/
 void StartADCTask(void *argument)
 {
-    test_result_t  res;
     ip_addr_t      pc_addr;
     uint8_t        test_success;
 
@@ -377,21 +348,7 @@ void StartADCTask(void *argument)
                (test_success == TEST_SUCCESS) ? "PASS" : "FAIL");
 
 send_result:
-        /* ------------------------------------------------------------------
-         * Send result to PC via lwIP core task (thread-safe).
-         * ----------------------------------------------------------------*/
-        res.test_id = cmd.test_id;
-        res.result  = test_success;
-
-        udp_send_req_t *req = pvPortMalloc(sizeof(udp_send_req_t));
-        if (req != NULL) {
-            req->res  = res;
-            req->addr = pc_addr;
-            req->port = g_pc_port;
-            tcpip_callback(send_result_callback, req);
-        } else {
-            printf("ERROR: ADC: Failed to allocate UDP send request\r\n");
-        }
+		uut_send_result(cmd.test_id, test_success, &pc_addr, g_pc_port);
     }
 }
 
