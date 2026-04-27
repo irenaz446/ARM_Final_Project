@@ -39,19 +39,20 @@ Result – Success or Failure.
 UUT Testing Program (Client Side) 
 1. Once the UUT Testing Program receives the test command, it will acquire the needed parameters and initiate the test on the required peripheral. 
 2. Tests will vary between peripherals; the following includes Unit Testing for every Peripheral: 
- UART, I2C, SPI:  
-The below procedure is described for UART testing but it stands for I2C and SPI as well.  1. Peripheral testing is required to be done using DMA mode if possible. 
+ - UART, I2C, SPI:  
+The below procedure is described for UART testing but it stands for I2C and SPI as well.
+1. Peripheral testing is required to be done using DMA mode if possible. 
 2. Each Peripheral testing will require peripheral parameters, please choose (assume) parameters needed at your convenience (i.e. for UART you can assume BAUD Rate 115200, 8bit Data, 1 Stop Bit, No parity). 
 3.  For the amount of needed iteration, the Testing Program will send the received Bit Pattern to the UART4, which in turn will pass the data to the UART5 port on the UUT.  
 4. UART5 will send back the received string to UART4 (predefined program waiting for incoming data).  
 5. For every iteration, the UUT Testing program will receive the incoming data from UART4 and compare it to sent data ( CRC Compare should be use for large bulks of data – above 100 bytes).  
 6. If the testing has been successful for all iterations; a success result should be sent to the Testing P.C. Program.  
 7. If at any time during the iterations a test has failed, testing should be stopped and a Failure result should be sent to the P.C. Testing Program. 
- ADC:  
-Use ADC required parameters at your own convenience (i.e. 12 bit ADC).  
+- ADC:  
+1. Use ADC required parameters at your own convenience (i.e. 12 bit ADC).  
 2. Running the test beforehand, we should already have the bitstream for the analog to digital conversion at the current voltage. 
- For each iteration Run the conversion and compare the ADC result with already known result.  
-Send the P.C. Testing Program the final test result (after all the iterations). 
+3. For each iteration Run the conversion and compare the ADC result with already known result.  
+4. Send the P.C. Testing Program the final test result (after all the iterations). 
 Timer:  
 This test is left for you to decide on design and implementation, think of the best way to measure time \ count pulses  
 Assume Timer required parameters at your own convenience. 
