@@ -53,6 +53,6 @@ The below procedure is described for UART testing but it stands for I2C and SPI 
 2. Running the test beforehand, we should already have the bitstream for the analog to digital conversion at the current voltage. 
 3. For each iteration Run the conversion and compare the ADC result with already known result.  
 4. Send the P.C. Testing Program the final test result (after all the iterations). 
-Timer:  
+- Timer:  
 This test is left for you to decide on design and implementation, think of the best way to measure time \ count pulses  
 Assume Timer required parameters at your own convenience. 
