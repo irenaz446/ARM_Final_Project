@@ -1,4 +1,5 @@
-Final Project for SE Embedded Systems 
+Final Project for SE Embedded Systems
+
 Introduction 
 A manufacturing company is interested in testing the peripherals on the STM32F756ZG card in order to ensure hardware correctness. The company is asking you to take part in card’s hardware verification for the following peripherals:  
 TIMER,  UART,  SPI,  I2C,  ADC  Eth (MAC & PHY)
