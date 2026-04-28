@@ -27,16 +27,6 @@
  *            (VREFINT_CAL — ADC raw value measured at 3.3V, 30°C).
  *            Expected raw value at 3.3V VDDA ≈ 1506 (12-bit).
  *
- * @note   ADC1 must be configured in CubeMX with:
- *           - Resolution: 12 bits
- *           - Channel 17 (VREFINT) enabled
- *           - Continuous conversion: Disabled (single conversion per trigger)
- *           - DMA continuous requests: Enabled
- *           - DMA: DMA2 Stream0 Channel0, Peripheral→Memory, Half-word
- *           - VREFINT must be enabled in ADC Common settings
- *
- * @note   All lwIP API calls are delegated to the lwIP core task via
- *         tcpip_callback() to avoid thread-safety violations.
  */
 
 #include "pc_test_uut.h"

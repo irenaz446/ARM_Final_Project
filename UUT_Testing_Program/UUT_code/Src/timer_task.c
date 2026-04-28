@@ -6,22 +6,18 @@
  * 16-bit advanced) as an independent reference clock on a different bus.
  *
  * Test design:
- *   - TIM1 is configured as a free-running microsecond reference counter.
- *     Prescaler = (APB2_CLK / 1_000_000) - 1, Period = 0xFFFF (max 16-bit).
- *     It runs continuously — we snapshot its counter before and after TIM2
- *     fires to measure actual elapsed time.
+ *   - TIM1 is a free-running reference counter that runs continuously, — we take
+ *     its counter before and after TIM2 fires to measure actual elapsed time.
  *
  *   - TIM2 is the Device Under Test (DUT). It is configured to generate an
  *     update event (overflow) after exactly TIMER_TEST_PERIOD_MS milliseconds.
- *     Prescaler = (APB1_CLK / 10_000) - 1 → 0.1ms per tick.
- *     Period = (TIMER_TEST_PERIOD_MS * 10) - 1 → overflow at target time.
  *
  *   Per iteration:
  *     1. Reset and start both timers.
  *     2. Record TIM1 counter snapshot (t_start).
  *     3. Block on task notification until TIM2 update ISR fires.
  *     4. Record TIM1 counter snapshot (t_end).
- *     5. Compute elapsed_us = (t_end - t_start) with 16-bit wraparound handling.
+ *     5. Compute elapsed_us = (t_end - t_start).
  *     6. Validate elapsed_us is within TIMER_TOLERANCE_PERCENT of expected.
  *
  * Hardware:  STM32F756ZG
@@ -38,10 +34,6 @@
  *         Counter Period = (TIMER_TEST_PERIOD_MS * 10) - 1
  *         auto-reload preload = Enable
  *         NVIC: TIM2 global interrupt — Enable
- *
- * @note   APB1 timer clock on STM32F756 = 108 MHz (x2 multiplier applied).
- *         APB2 timer clock on STM32F756 = 216 MHz.
- *         Verify your actual clock tree in CubeMX before setting prescalers.
  *
  * @note   All lwIP API calls are delegated to the lwIP core task via
  *         tcpip_callback() to avoid thread-safety violations.
@@ -76,9 +68,7 @@ extern uint16_t          g_pc_port;       /* PC source port for UDP reply     */
  * Test parameters
  * -------------------------------------------------------------------------*/
 
-/* TIM2 test period in milliseconds — how long TIM2 runs before overflow.
- * Keep short enough that TIM1 (16-bit, 1us/tick = 65.535ms max) doesn't
- * wrap more than once. 50ms is safe. */
+/* TIM2 test period in milliseconds */
 #define TIMER_TEST_PERIOD_MS      50U
 
 /* Expected elapsed time in microseconds */
