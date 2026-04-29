@@ -1,9 +1,13 @@
 CLI Usage:
 
-Single: ./pc_test_program uart 10
+Single: ./pc_test_program uart 10 "aaaaaaahhhhhhhhhhhhhhhhhhhhhdddddddddddddddddvvvvvvvvvvvvvvvvv"
+        ./pc_test_program spi 2
+        ./pc_test_program i2c 1
+        ./pc_test_program adc 3
+        ./pc_test_program timer 5
 
 All: ./pc_test_program --all 5
 
 Report: ./pc_test_program --report
 
-./pc_test_uut --clean
+Clean: ./pc_test_uut --clean
