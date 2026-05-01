@@ -14,6 +14,7 @@ test_db_t* test_db_init(const char *path) {
     }
 
     if (sqlite3_open(path, &db->handle) != SQLITE_OK) {
+        sqlite3_close(db->handle);
         free(db);
         return NULL;
     }
@@ -33,7 +34,11 @@ test_db_t* test_db_init(const char *path) {
 int test_db_save(test_db_t *db, uint32_t id, double duration, 
                  const char *peripheral, const char *status) {
     sqlite3_stmt *stmt;
-    const char *sql = "INSERT INTO results VALUES (?, datetime('now'), ?, ?, ?);";
+    const char *sql = "INSERT OR IGNORE INTO results VALUES (?, datetime('now'), ?, ?, ?);";
+    
+    if (db == NULL) {
+        return -1;
+    }
 
     if (sqlite3_prepare_v2(db->handle, sql, -1, &stmt, NULL) != SQLITE_OK) {
         return -1;
@@ -46,12 +51,25 @@ int test_db_save(test_db_t *db, uint32_t id, double duration,
 
     int rc = (sqlite3_step(stmt) == SQLITE_DONE) ? 0 : -1;
     sqlite3_finalize(stmt);
+
+    if (rc == 0 && sqlite3_changes(db->handle) == 0) {
+        printf("Warning: test ID already existed — result not saved\n");
+    }
+
     return rc;
 }
 
 void test_db_print_report(test_db_t *db) {
     sqlite3_stmt *stmt;
-    sqlite3_prepare_v2(db->handle, "SELECT * FROM results;", -1, &stmt, NULL);
+
+    if (db == NULL) {
+        printf("Warning: Nothing to print — failed to get DB\n");
+        return;
+    }
+
+    if (sqlite3_prepare_v2(db->handle, "SELECT * FROM results;", -1, &stmt, NULL) != SQLITE_OK) {
+        return;
+    }
 
     printf("\n%-10s | %-20s | %-8s | %-10s | %-8s\n", "ID", "Timestamp", "Dur(s)", "Periph", "Result");
     while (sqlite3_step(stmt) == SQLITE_ROW) {

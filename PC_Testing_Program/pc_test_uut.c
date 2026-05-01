@@ -75,6 +75,48 @@ static int run_single_test(int sockfd, test_db_t *db, uint8_t periph_id,
     return test_db_save(db, res.test_id, dur, name, status_str);
 }
 
+/* ---------------------------------------------------------------------------
+ * @brief  Parses and validates a string as an unsigned 8-bit integer.
+ *
+ * Rejects: non-numeric characters, negative values, values > 255,
+ *          empty strings, and strings with leading/trailing whitespace.
+ *
+ * @param  str      Input string to parse.
+ * @param  out      Pointer to store the result on success.
+ * @retval 0 on success, -1 on any validation failure.
+ * -------------------------------------------------------------------------*/
+static int parse_uint8(const char *str, uint8_t *out)
+{
+    if (str == NULL || *str == '\0') {
+        fprintf(stderr, "Error: iterations argument is empty\n");
+        return -1;
+    }
+
+    /* Reject leading sign characters — strtoul accepts '+'/'-' */
+    if (*str == '-' || *str == '+') {
+        fprintf(stderr, "Error: iterations must be a positive integer\n");
+        return -1;
+    }
+
+    char    *end  = NULL;
+    unsigned long val = strtoul(str, &end, 10);
+
+    /* end must point to the null terminator — any remaining character
+     * means the input contained non-numeric data (e.g. "3x", "1.5") */
+    if (*end != '\0') {
+        fprintf(stderr, "Error: invalid character '%c' in iterations\n", *end);
+        return -1;
+    }
+
+    if (val > 255) {
+        fprintf(stderr, "Error: iterations must be <= 255 (got %lu)\n", val);
+        return -1;
+    }
+
+    *out = (uint8_t)val;
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     int sockfd = STATUS_COMM_FAILURE;
     test_db_t *db = NULL;
@@ -119,7 +161,10 @@ int main(int argc, char *argv[]) {
     struct timeval tv = { .tv_sec = TIMEOUT_SEC };
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
-    uint8_t iterations = (uint8_t)atoi(argv[2]);
+    uint8_t iterations = 0;
+    if (parse_uint8(argv[2], &iterations) != 0) {
+        goto cleanup;
+    }
     const char *pattern = (argc > 3) ? argv[3] : "Dummy Payload";
 
     /* Check for --all or single peripheral */
