@@ -78,6 +78,7 @@ void uut_send_result(uint32_t test_id, uint8_t result,
         tcpip_callback(send_result_callback, req);
     } else {
         printf("ERROR: uut_send_result — heap allocation failed\r\n");
+        vPortFree(req);
     }
 }
 
@@ -96,12 +97,10 @@ void uut_send_result(uint32_t test_id, uint8_t result,
 uint8_t uut_validate_crc(const uint32_t *sent, const uint32_t *received,
                           uint8_t len)
 {
-    uint32_t words  = len / 4U;
-
     /* HAL_CRC_Calculate takes a non-const pointer — cast is safe because
      * the CRC peripheral only reads the data, never writes it. */
-    uint32_t c_sent = HAL_CRC_Calculate(&hcrc, (uint32_t *)sent,     words);
-    uint32_t c_recv = HAL_CRC_Calculate(&hcrc, (uint32_t *)received, words);
+    uint32_t c_sent = HAL_CRC_Calculate(&hcrc, (uint32_t *)sent,     (uint32_t)len);
+    uint32_t c_recv = HAL_CRC_Calculate(&hcrc, (uint32_t *)received, (uint32_t)len);
 
     if (c_sent != c_recv) {
         printf("ERROR: CRC mismatch: sent=0x%08lX recv=0x%08lX\r\n",

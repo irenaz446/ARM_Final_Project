@@ -178,10 +178,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
  * -------------------------------------------------------------------------*/
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-    if (huart->Instance == UART4) {
-        printf("ERROR: UART4 error, code=0x%08lX\r\n", huart->ErrorCode);
-    }
-    if (huart->Instance == UART5) {
-        printf("ERROR: UART5 error, code=0x%08lX\r\n", huart->ErrorCode);
-    }
+    BaseType_t x = pdFALSE;
+
+    (void)huart;
+    vTaskNotifyGiveFromISR(UARTTaskHandle, &x);
+    portYIELD_FROM_ISR(x);
+
 }

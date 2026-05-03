@@ -322,12 +322,10 @@ void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c)
 {
     BaseType_t x = pdFALSE;
     if (hi2c->Instance == I2C4) {
-        printf("ERROR: I2C4 error, code=0x%08lX\r\n", hi2c->ErrorCode);
         xTaskNotifyFromISR(I2CTaskHandle, I2C_NOTIFY_MASTER_DONE, eSetBits, &x);
         portYIELD_FROM_ISR(x);
     }
     if (hi2c->Instance == I2C2) {
-        printf("ERROR: I2C2 error, code=0x%08lX\r\n", hi2c->ErrorCode);
         xTaskNotifyFromISR(I2CTaskHandle, I2C_NOTIFY_SLAVE_DONE, eSetBits, &x);
         portYIELD_FROM_ISR(x);
     }

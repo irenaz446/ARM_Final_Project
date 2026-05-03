@@ -126,6 +126,11 @@ static uint8_t adc_sample_average(uint16_t num_samples, uint32_t *result_out)
     /* Ensure ADC is idle before starting */
     HAL_ADC_Stop_DMA(&hadc1);
 
+    if(num_samples > ADC_CALIB_SAMPLES) {
+        printf("ERROR: ADC num samples exceeded the maximum (num_samples=%d)\r\n", num_samples);
+        return TEST_FAILURE;
+    }
+
     if (HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_dma_buf, num_samples) != HAL_OK) {
         printf("ERROR: ADC DMA start failed (state=0x%08lX)\r\n", hadc1.State);
         return TEST_FAILURE;
@@ -375,7 +380,6 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef *hadc)
     BaseType_t x = pdFALSE;
 
     if (hadc->Instance == ADC1) {
-        printf("ERROR: ADC1 error, state=0x%08lX\r\n", hadc->State);
         xTaskNotifyFromISR(ADCTaskHandle, ADC_NOTIFY_CONV_DONE, eSetBits, &x);
         portYIELD_FROM_ISR(x);
     }

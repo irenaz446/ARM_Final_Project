@@ -237,12 +237,10 @@ void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi)
     BaseType_t x = pdFALSE;
 
     if (hspi->Instance == SPI4) {
-        printf("ERROR: SPI4 error, code=0x%08lX\r\n", hspi->ErrorCode);
         xTaskNotifyFromISR(SPITaskHandle, SPI_NOTIFY_MASTER_DONE, eSetBits, &x);
         portYIELD_FROM_ISR(x);
     }
     if (hspi->Instance == SPI1) {
-        printf("ERROR: SPI1 error, code=0x%08lX\r\n", hspi->ErrorCode);
         xTaskNotifyFromISR(SPITaskHandle, SPI_NOTIFY_SLAVE_DONE, eSetBits, &x);
         portYIELD_FROM_ISR(x);
     }
