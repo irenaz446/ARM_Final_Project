@@ -1,6 +1,7 @@
 Final Project for SE Embedded Systems
 
-Introduction 
+Introduction
+
 A manufacturing company is interested in testing the peripherals on the STM32F756ZG card in order to ensure hardware correctness. The company is asking you to take part in card’s hardware verification for the following peripherals:  
 TIMER,  UART,  SPI,  I2C,  ADC  Eth (MAC & PHY)
 The verification resembles a client server program, the testing program (server) running on the P.C, sends commands using a proprietary protocol over UDP (IP/Ethernet) to the UUT. Once the UUT Testing program receives the proprietary protocol, finds out the peripheral to be tested and starts running the test. 
